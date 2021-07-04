@@ -8,6 +8,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -19,6 +20,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
@@ -32,10 +34,8 @@ import java.util.Map;
 
 public class InboxActivity extends AppCompatActivity {
 
-    public void backToDashboard(View view) {
-        Intent i = new Intent(this, DashboardActivity.class);
+    public void back(View view) {
         this.finish();
-        startActivity(i);
     }
 
     // Sad about this method
@@ -110,15 +110,58 @@ public class InboxActivity extends AppCompatActivity {
         queue.add(request);
     }
 
+    public void sendMessage() {
+        TextView textView = findViewById(R.id.response_text);
+        String messageText = textView.getText().toString();
+
+        String url ="http://192.168.1.4:8000/api/inbox/";
+
+        Spinner userListDropdown = findViewById(R.id.response_list);
+        String user = userListDropdown.getSelectedItem().toString();
+        JSONObject body = new JSONObject();
+
+        try {
+            body.put("user", 2);
+            body.put("sender", getIntent().getStringExtra("email"));
+            body.put("topic", "Personal message");
+            body.put("demand", "false");
+            body.put("text", messageText);
+            body.put("recipient", user);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, body, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Toast.makeText(InboxActivity.this, "Message was sent", Toast.LENGTH_SHORT).show();
+            }
+
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("error is ", "" + error);
+            }
+        }) {
+
+            //This is for Headers If You Needed
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Authorization", "JWT " + getIntent().getStringExtra("jwt_token"));
+                return params;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        queue.add(request);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inbox);
 
         getOrganizationUsers();
-
-
-
 
         TextView from, topic, letter;
         String[] message = (String[]) getIntent().getSerializableExtra("message");
@@ -138,7 +181,15 @@ public class InboxActivity extends AppCompatActivity {
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                backToDashboard(view);
+                back(view);
+            }
+        });
+
+        Button send = findViewById(R.id.send_button);
+        send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sendMessage();
             }
         });
     }

@@ -12,10 +12,8 @@ import android.widget.TextView;
 
 public class ReportActivity extends AppCompatActivity {
 
-    public void backToDashboard(View view) {
-        Intent i = new Intent(this, DashboardActivity.class);
+    public void back(View view) {
         this.finish();
-        startActivity(i);
     }
 
     public void insertValues() {
@@ -54,7 +52,7 @@ public class ReportActivity extends AppCompatActivity {
         backToDash.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                backToDashboard(view);
+                back(view);
             }
         });
     }
