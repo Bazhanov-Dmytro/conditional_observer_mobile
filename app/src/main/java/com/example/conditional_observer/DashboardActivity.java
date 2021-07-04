@@ -38,28 +38,27 @@ public class DashboardActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-    public void showMessage(View view) {
-        Intent i = new Intent(this, InboxActivity.class);
-        this.finish();
-        startActivity(i);
-    }
-
     // Transmit JSON into next activity
-    public void createList(ArrayList<String[]> reports) {
+    public void createList(ArrayList<String[]> reports, String type) {
         Intent i = new Intent(this, scrollableListActivity.class);
-        i.putExtra("reports", reports);
+        i.putExtra("type", type);
+        i.putExtra("email", getIntent().getStringExtra("email"));
+        i.putExtra("jwt_token", getIntent().getStringExtra("jwt_token"));
+        i.putExtra(type, reports);
         startActivity(i);
     }
 
     // Filter reports
     // Separate JSON into arrays
-    public void userFiltration(JSONArray response) throws JSONException {
+    public void userFiltration(JSONArray response, String content) throws JSONException {
         ArrayList<String[]> reports = new ArrayList<String[]>();
+        String type = "";
 
         for (int i = 0; i < response.length(); i++) {
             JSONObject current = response.getJSONObject(i);
 
-            if (current.getString("user").equals(getIntent().getStringExtra("email"))) {
+            if (current.getString("user").equals(getIntent().getStringExtra("email")) && content.equals("reports")) {
+                type = "report";
                 String[] report = new String[] {
                         current.getString("date"),
                         current.getString("user"),
@@ -70,20 +69,29 @@ public class DashboardActivity extends AppCompatActivity {
                         current.getString("pulse"),
                         current.getString("recommendations"),
                 };
-
                 reports.add(report);
+            } else if (content.equals("inbox")) {
+                type = "message";
+                String[] inboxMessage = new String[] {
+                        current.getString("sender"),
+                        current.getString("recipient"),
+                        current.getString("topic"),
+                        current.getString("text"),
+                };
+                reports.add(inboxMessage);
             }
         }
-        createList(reports);
+        createList(reports, type);
     }
-    public void getReports() {
-        String url ="http://192.168.1.4:8000/api/reports/";
+
+    public void getReports(final String content) {
+        String url ="http://192.168.1.4:8000/api/" + content + "/";
 
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
-                    userFiltration(response);
+                    userFiltration(response, content);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -127,7 +135,7 @@ public class DashboardActivity extends AppCompatActivity {
         reportBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getReports();
+                getReports("reports");
             }
         });
         logoutBtn.setOnClickListener(new View.OnClickListener() {
@@ -139,7 +147,7 @@ public class DashboardActivity extends AppCompatActivity {
         messagesBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showMessage(view);
+                getReports("inbox");
             }
         });
     }
