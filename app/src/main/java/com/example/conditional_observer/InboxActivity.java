@@ -147,52 +147,6 @@ public class InboxActivity extends AppCompatActivity {
         queue.add(request);
     }
 
-    public void sendMessage() {
-        TextView textView = findViewById(R.id.response_text);
-        String messageText = textView.getText().toString();
-
-        String url ="http://192.168.1.4:8000/api/inbox/";
-
-        Spinner userListDropdown = findViewById(R.id.response_list);
-        String user = userListDropdown.getSelectedItem().toString();
-        JSONObject body = new JSONObject();
-
-        try {
-            body.put("user", 2);
-            body.put("sender", getIntent().getStringExtra("email"));
-            body.put("topic", "Personal message");
-            body.put("demand", "false");
-            body.put("text", messageText);
-            body.put("recipient", user);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, body, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                Toast.makeText(InboxActivity.this, "Message was sent", Toast.LENGTH_SHORT).show();
-            }
-
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("error is ", "" + error);
-            }
-        }) {
-
-            //This is for Headers If You Needed
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("Authorization", "JWT " + getIntent().getStringExtra("jwt_token"));
-                return params;
-            }
-        };
-        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-        queue.add(request);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
