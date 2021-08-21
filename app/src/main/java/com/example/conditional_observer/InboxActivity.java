@@ -38,33 +38,25 @@ public class InboxActivity extends AppCompatActivity {
         this.finish();
     }
 
-    // Sad about this method
-    public ArrayList<String> filtration(JSONArray response) throws JSONException {
-        String organization = "";
+    // converting response to list
+    public ArrayList<String> toList(JSONArray response) throws JSONException {
         ArrayList<String> colleagues = new ArrayList<String>();
 
-        // finding current user's organization
-        for (int i = 0; i < response.length(); i++) {
-            JSONObject current = response.getJSONObject(i);
-
-            if (current.getString("email").equals(getIntent().getStringExtra("email"))) {
-                organization = current.getString("organization");
-                break;
-            }
-        }
         // finding current user's colleague
         for (int i = 0; i < response.length(); i++) {
             JSONObject current = response.getJSONObject(i);
 
-            if (current.getString("organization").equals(organization) && !current.getString("email").equals(getIntent().getStringExtra("email"))) {
-                String colleague = current.getString("email");
-                colleagues.add(colleague);
-            }
+            if (current.getString("email").equals(getIntent().getStringExtra("email")))
+                continue;
+
+            String colleague = current.getString("email");
+            colleagues.add(colleague);
         }
 
         return colleagues;
     }
 
+    // filling the list
     public void aaa(String[] str) {
         Spinner userListDropdown = findViewById(R.id.response_list);
 
@@ -72,16 +64,17 @@ public class InboxActivity extends AppCompatActivity {
         userListDropdown.setAdapter(adapter);
     }
 
+    // get user from same organization
     public void getOrganizationUsers() {
-        String url ="http://192.168.1.4:8000/api/users/";
+        String url ="http://192.168.1.5:8000/api/users/";
 
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
-                    ArrayList<String> resp = filtration(response);
-                    String[] preColleagues = new String[filtration(response).size()];
-                    for (int i = 0; i < filtration(response).size(); i++) {
+                    ArrayList<String> resp = toList(response);
+                    String[] preColleagues = new String[toList(response).size()];
+                    for (int i = 0; i < toList(response).size(); i++) {
                         preColleagues[i] = resp.get(i);
                     }
 
@@ -102,7 +95,51 @@ public class InboxActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("Authorization", "JWT " + getIntent().getStringExtra("jwt_token"));
+                params.put("Authorization", "Bearer " + getIntent().getStringExtra("jwt_token"));
+                return params;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        queue.add(request);
+    }
+
+    public void sendMessage() {
+        TextView textView = findViewById(R.id.response_text);
+        String messageText = textView.getText().toString();
+
+        String url ="http://192.168.1.5:8000/api/messages/";
+
+        Spinner userListDropdown = findViewById(R.id.response_list);
+        String user = userListDropdown.getSelectedItem().toString();
+        JSONObject body = new JSONObject();
+
+        try {
+            body.put("sender", getIntent().getStringExtra("email"));
+            body.put("header", "Personal message");
+            body.put("text", messageText);
+            body.put("recipient", user);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, body, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Toast.makeText(InboxActivity.this, "Message was sent", Toast.LENGTH_SHORT).show();
+            }
+
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("error is ", "" + error);
+            }
+        }) {
+
+            //This is for Headers If You Needed
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Authorization", "Bearer " + getIntent().getStringExtra("jwt_token"));
                 return params;
             }
         };

@@ -33,12 +33,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="31dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="10dp"
         android:text="Recommendations for employee:"
         android:textSize="18dp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pressure_text" />
+        app:layout_constraintTop_toBottomOf="@+id/danger_level_desc" />
 
     <TextView
         android:id="@+id/email_text"
@@ -53,38 +53,27 @@
         app:layout_constraintTop_toBottomOf="@+id/back_to_dash2" />
 
     <TextView
-        android:id="@+id/indicators_text"
+        android:id="@+id/danger_level_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="31dp"
         android:layout_marginTop="15dp"
-        android:text="Indicators:"
+        android:text="Danger Level - "
         android:textSize="18dp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/email_text" />
 
     <TextView
-        android:id="@+id/pulse_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/danger_level_desc"
+        android:layout_width="343dp"
+        android:layout_height="131dp"
         android:layout_marginStart="35dp"
         android:layout_marginTop="9dp"
-        android:text="- Pulse:"
+        android:text="danger level describes how good or bad your health shape is, level - 0 indicates that you are perfectly healthy, level - 1 gives us a warning, level - 2 indicates that you should take a break and consider the usage of hints to improve your health. Level - 3 indicates that you need a doctor's appointment in the nearest future."
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/indicators_text" />
-
-    <TextView
-        android:id="@+id/pressure_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="35dp"
-        android:layout_marginTop="9dp"
-        android:text="- Pressure:"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/temperature_text" />
+        app:layout_constraintTop_toBottomOf="@+id/danger_level_text" />
 
     <ImageButton
         android:id="@+id/back_to_dash2"
@@ -112,14 +101,4 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/temperature_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="35dp"
-        android:layout_marginTop="9dp"
-        android:text="- Temperature:"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pulse_text" />
 </androidx.constraintlayout.widget.ConstraintLayout>

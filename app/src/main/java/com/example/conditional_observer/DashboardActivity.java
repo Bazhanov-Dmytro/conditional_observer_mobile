@@ -48,50 +48,33 @@ public class DashboardActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-    // Filter reports
-    // Separate JSON into arrays
-    public void userFiltration(JSONArray response, String content) throws JSONException {
-        ArrayList<String[]> reports = new ArrayList<String[]>();
+    // for messages scrollable list
+    public void userMessages(JSONArray response, String content) throws JSONException {
+        ArrayList<String[]> messages = new ArrayList<String[]>();
         String type = "";
 
         for (int i = 0; i < response.length(); i++) {
             JSONObject current = response.getJSONObject(i);
-
-            if (current.getString("user").equals(getIntent().getStringExtra("email")) && content.equals("reports")) {
-                type = "report";
-                String[] report = new String[] {
-                        current.getString("date"),
-                        current.getString("user"),
-                        current.getString("organization"),
-                        current.getString("temperature"),
-                        current.getString("upper_pressure"),
-                        current.getString("lower_pressure"),
-                        current.getString("pulse"),
-                        current.getString("recommendations"),
-                };
-                reports.add(report);
-            } else if (content.equals("inbox")) {
-                type = "message";
-                String[] inboxMessage = new String[] {
-                        current.getString("sender"),
-                        current.getString("recipient"),
-                        current.getString("topic"),
-                        current.getString("text"),
-                };
-                reports.add(inboxMessage);
+            type = "message";
+            String[] inboxMessage = new String[] {
+                    current.getString("sender"),
+                    current.getString("recipient"),
+                    current.getString("header"),
+                    current.getString("text"),
+            };
+            messages.add(inboxMessage);
             }
-        }
-        createList(reports, type);
+        createList(messages, type);
     }
-
-    public void getReports(final String content) {
-        String url ="http://192.168.1.4:8000/api/" + content + "/";
+    //
+    public void getMessages(final String content) {
+        String url ="http://192.168.1.5:8000/api/messages/";
 
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
-                    userFiltration(response, content);
+                    userMessages(response, content);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -108,7 +91,59 @@ public class DashboardActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("Authorization", "JWT " + getIntent().getStringExtra("jwt_token"));
+                params.put("Authorization", "Bearer " + getIntent().getStringExtra("jwt_token"));
+                return params;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        queue.add(request);
+    }
+
+
+    public void userReports(JSONArray response, String content) throws JSONException {
+        ArrayList<String[]> reports = new ArrayList<String[]>();
+        String type = "";
+
+        for (int i = 0; i < response.length(); i++) {
+            JSONObject current = response.getJSONObject(i);
+            type = "report";
+            String[] reportInstance = new String[] {
+                    current.getString("user"),
+                    current.getString("creation_date"),
+                    current.getString("danger_level"),
+                    current.getString("recommendation"),
+            };
+            reports.add(reportInstance);
+        }
+        createList(reports, type);
+    }
+
+    public void getReports(final String content) {
+        String url ="http://192.168.1.5:8000/api/reports/";
+
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    userReports(response, content);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("error is ", "" + error);
+            }
+        }) {
+
+            //This is for Headers If You Needed
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Authorization", "Bearer " + getIntent().getStringExtra("jwt_token"));
+                params.put("email", getIntent().getStringExtra("email"));
                 return params;
             }
         };
@@ -147,7 +182,7 @@ public class DashboardActivity extends AppCompatActivity {
         messagesBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getReports("inbox");
+                getMessages("messages");
             }
         });
     }

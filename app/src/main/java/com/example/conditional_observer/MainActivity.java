@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     public void loginRequest() {
         //
         RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
-        String url ="http://192.168.1.4:8000/get_jwt_token/";
+        String url ="http://192.168.1.5:8000/api/token/";
 
         final String[] credentials = getLoginData();
 
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         // Display the first 500 characters of the response string.
                         try {
-                            login(response.getString("token"), credentials[0]);
+                            login(response.getString("access"), credentials[0]);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
